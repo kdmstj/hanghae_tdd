@@ -1,6 +1,8 @@
 package io.hhplus.tdd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hhplus.tdd.fixture.PointHistoryFixture;
+import io.hhplus.tdd.fixture.UserPointFixture;
 import io.hhplus.tdd.point.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,14 +37,15 @@ class PointControllerTest {
     void 특정_유저의_포인트_조회시_성공한다() throws Exception {
         // given
         long userId = 1L;
-        UserPoint userPoint = new UserPoint(userId, 1000L, System.currentTimeMillis());
+        long point = 1000L;
+        UserPoint userPoint = UserPointFixture.withUserIdAndPoint(userId, point);
         given(pointService.get(userId)).willReturn(userPoint);
 
         // when & then
         mockMvc.perform(get("/points/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId))
-                .andExpect(jsonPath("$.point").value(1000L));
+                .andExpect(jsonPath("$.point").value(point));
     }
 
     @Test
@@ -50,8 +53,8 @@ class PointControllerTest {
         // given
         long userId = 1L;
         List<PointHistory> histories = List.of(
-                new PointHistory(1, userId, 1000, TransactionType.CHARGE, System.currentTimeMillis()),
-                new PointHistory(2, userId, -500, TransactionType.USE, System.currentTimeMillis())
+                PointHistoryFixture.withIdAndUserIdAndAmountAndTransactionType(1, userId, 1000, TransactionType.CHARGE),
+                PointHistoryFixture.withIdAndUserIdAndAmountAndTransactionType(2, userId, -500, TransactionType.USE)
         );
 
         given(pointService.getHistory(userId)).willReturn(histories);
@@ -73,7 +76,7 @@ class PointControllerTest {
         //given
         long userId = 1L;
         long originAmount = 0;
-        UserPoint userPoint = new UserPoint(userId, originAmount + chargeAmount, System.currentTimeMillis());
+        UserPoint userPoint = UserPointFixture.withUserIdAndPoint(userId, originAmount + chargeAmount);
 
         given(pointService.charge(userId, chargeAmount)).willReturn(userPoint);
 
@@ -88,10 +91,9 @@ class PointControllerTest {
     }
 
     @Test
-    void 특정_유저의_포인트_충전시_음수로하면_실패한다() throws Exception  {
+    void 특정_유저의_포인트_충전시_음수로하면_실패한다() throws Exception {
         //given
         long userId = 1L;
-        long originAmount = 0;
         long chargeAmount = -1;
 
         //when & then
@@ -109,7 +111,7 @@ class PointControllerTest {
         //given
         long userId = 1L;
         long originAmount = 2000L;
-        UserPoint userPoint = new UserPoint(userId, originAmount - useAmount, System.currentTimeMillis());
+        UserPoint userPoint = UserPointFixture.withUserIdAndPoint(userId, originAmount - useAmount);
 
         given(pointService.use(userId, useAmount)).willReturn(userPoint);
 
@@ -128,7 +130,6 @@ class PointControllerTest {
     void 특정_유저의_포인트_차감시_음수로하면_실패한다() throws Exception {
         //given
         long userId = 1L;
-        long originAmount = 2000L;
         long useAmount = -1;
 
         PointRequest request = new PointRequest(useAmount);
