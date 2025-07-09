@@ -1,9 +1,13 @@
 package io.hhplus.tdd;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
@@ -18,5 +22,17 @@ class ApiControllerAdvice extends ResponseEntityExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
         HttpStatus httpStatus = HttpStatus.valueOf(errorCode.getStatus());
         return ResponseEntity.status(httpStatus).body(new ErrorResponse(String.valueOf(httpStatus), errorCode.getMessage()));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        ErrorResponse errorResponse =
+                new ErrorResponse("400", ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 }
