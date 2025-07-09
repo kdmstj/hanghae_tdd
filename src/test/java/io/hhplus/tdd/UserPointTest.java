@@ -1,5 +1,6 @@
 package io.hhplus.tdd;
 
+import io.hhplus.tdd.fixture.UserPointFixture;
 import io.hhplus.tdd.point.UserPoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,9 +14,8 @@ public class UserPointTest {
     @Test
     void 충전시_포인트가_정상적으로_충전된다() {
         //given
-        long userId = 1;
         long originAmount = 0;
-        UserPoint userPoint = new UserPoint(userId, originAmount, System.currentTimeMillis());
+        UserPoint userPoint = UserPointFixture.withPoint(originAmount);
 
         //when
         long chargeAmount = 2000;
@@ -28,9 +28,8 @@ public class UserPointTest {
     @Test
     void 포인트가_정상적으로_차감된다() {
         //given
-        long userId = 1;
         long originAmount = 2000;
-        UserPoint userPoint = new UserPoint(userId, originAmount, System.currentTimeMillis());
+        UserPoint userPoint = UserPointFixture.withPoint(originAmount);
 
         //when
         long useAmount = 1000;
@@ -44,8 +43,7 @@ public class UserPointTest {
     @ValueSource(ints = {0, 1000})
     void 포인트가_부족하면_차감이_불가능하다(int originAmount) {
         // given
-        long userId = 1;
-        UserPoint userPoint = new UserPoint(userId, originAmount, System.currentTimeMillis());
+        UserPoint userPoint = UserPointFixture.withPoint(originAmount);
 
         // when & then
         long useAmount = 2000;
