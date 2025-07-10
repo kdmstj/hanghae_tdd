@@ -19,4 +19,8 @@ public class PointHistoryRepository {
     public void save(long userId, long amount, TransactionType transactionType){
         pointHistoryTable.insert(userId, amount, transactionType, System.currentTimeMillis());
     }
+
+    public void clear(){
+        pointHistoryTable.clear();
+    }
 }

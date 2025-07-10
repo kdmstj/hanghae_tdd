@@ -17,4 +17,8 @@ public class UserPointRepository {
     public UserPoint save(long userId, long amount){
         return userPointTable.insertOrUpdate(userId, amount);
     }
+
+    public void clear(){
+        userPointTable.clear();
+    }
 }
