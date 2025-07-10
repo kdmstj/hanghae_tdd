@@ -20,7 +20,7 @@ public class PointService {
         return pointHistoryRepository.getAllBy(userId);
     }
 
-    public UserPoint charge(long userId, long amount) {
+    public synchronized UserPoint charge(long userId, long amount) {
         UserPoint userPoint = get(userId);
         UserPoint updatedPoint = userPoint.charge(amount);
 
@@ -30,7 +30,7 @@ public class PointService {
         return savedPoint;
     }
 
-    public UserPoint use(long userId, long amount) {
+    public synchronized UserPoint use(long userId, long amount) {
         UserPoint userPoint = get(userId);
         UserPoint updatedPoint = userPoint.use(amount);
 
