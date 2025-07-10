@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,5 +135,77 @@ public class PointServiceIntegrationTest {
 
         List<PointHistory> histories = pointService.getHistory(userId);
         assertThat(histories).noneMatch(h -> h.amount() < 0);
+    }
+
+    /**
+     * 동시에 여러번 충전 시 모두 정상적으로 충전되는 것을 검증
+     */
+    @Test
+    void 동시에_여러번_적립시_정상적으로_적립된다() throws InterruptedException {
+        // given
+        long userId = 1L;
+        int threadCount = 100;
+        long amountPerThread = 100;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        // when
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointService.charge(userId, amountPerThread);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        UserPoint result = pointService.get(userId);
+        assertThat(result.point()).isEqualTo(threadCount * amountPerThread);
+
+        List<PointHistory> histories = pointService.getHistory(userId);
+        assertThat(histories.size()).isEqualTo(threadCount);
+    }
+
+    /**
+     * 동시에 여러번 차감 시 모두 정상적으로 차감되는 것을 검증
+     */
+    @Test
+    void 동시에_여러번_차감시_정상적으로_차감된다() throws InterruptedException {
+        // given
+        long userId = 1L;
+        int threadCount = 50;
+        long amountPerThread = 20;
+
+        pointService.charge(userId, threadCount * amountPerThread);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        // when
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointService.use(userId, amountPerThread);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        UserPoint result = pointService.get(userId);
+        assertThat(result.point()).isEqualTo(0);
+
+        List<PointHistory> histories = pointService.getHistory(userId);
+        assertThat(histories).filteredOn(h -> h.amount() < 0).hasSize(threadCount);
     }
 }
