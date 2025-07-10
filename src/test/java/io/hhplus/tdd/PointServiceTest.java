@@ -27,6 +27,11 @@ public class PointServiceTest {
     @Mock
     PointHistoryRepository pointHistoryRepository;
 
+    /**
+     * [서비스 동작]
+     * 특정 유저의 현재 포인트를 조회할 수 있는지 검증한다.
+     * getBy가 호출되어 결과가 반환되는지 확인한다.
+     */
     @Test
     void 특정_유저의_포인트를_조회한다() {
         // given
@@ -41,6 +46,11 @@ public class PointServiceTest {
         assertThat(result.id()).isEqualTo(userId);
     }
 
+    /**
+     * [서비스 동작]
+     * 특정 유저의 포인트 사용 내역을 조회할 수 있는지 검증한다.
+     * getAllBy가 호출되어 올바른 결과가 반환되는지 확인한다.
+     */
     @Test
     void 특정_유저의_포인트_사용내역을_조회한다() {
         // given
@@ -58,6 +68,12 @@ public class PointServiceTest {
         assertThat(result).hasSize(2);
     }
 
+    /**
+     * [서비스 동작]
+     * 포인트 충전 시:
+     * 1. 포인트를 업데이트 하는 메서드가 호출되는지
+     * 2. 충전 이력을 기록하는 메서드가 호출되는지
+     */
     @Test
     void 포인트_적립시_이력을_남긴다() {
         // given
@@ -76,6 +92,12 @@ public class PointServiceTest {
         verify(pointHistoryRepository).save(userId, chargeAmount, TransactionType.CHARGE);
     }
 
+    /**
+     * [서비스 동작]
+     * 포인트 사용 시:
+     * 1. 포인트를 업데이트 하는 메서드가 호출되는지
+     * 2. 사용 이력을 기록하는 메서드가 호출되는지
+     */
     @Test
     void 포인트_차감시_이력을_남긴다() {
         // given

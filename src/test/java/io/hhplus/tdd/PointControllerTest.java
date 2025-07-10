@@ -33,6 +33,9 @@ class PointControllerTest {
     @MockBean
     PointService pointService;
 
+    /**
+     * 직렬화가 잘 이루어지는지 검증
+     */
     @Test
     void 특정_유저의_포인트_조회시_성공한다() throws Exception {
         // given
@@ -48,6 +51,9 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.point").value(point));
     }
 
+    /**
+     * 직렬화가 잘 이루어지는지 검증
+     */
     @Test
     void 특정_유저의_포인트_내역을_조회시_성공한다() throws Exception {
         // given
@@ -70,6 +76,10 @@ class PointControllerTest {
                 .andExpect(jsonPath("$[1].type").value("USE"));
     }
 
+    /**
+     * 0보다 크거나 같은 값을 요청하면, 유효성 검증 통과하는지 검증
+     * 직렬화가 잘 이루어지는지 검증
+     */
     @ParameterizedTest
     @ValueSource(ints = {0, 1000})
     void 특정_유저의_포인트_충전에_성공한다(long chargeAmount) throws Exception {
@@ -90,6 +100,10 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.point").value(originAmount + chargeAmount));
     }
 
+    /**
+     * 음수를 요청하면, 유효성 검증에 실패하는지 검증
+     * ErrorResponse 에 대하여 직렬화가 잘 이루어지는지 검증
+     */
     @Test
     void 특정_유저의_포인트_충전시_음수로하면_실패한다() throws Exception {
         //given
@@ -105,6 +119,10 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.message").value("포인트는 0을 포함한 양수이어야 합니다"));
     }
 
+    /**
+     * 0보다 크거나 같은 값을 요청하면, 유효성 검증 통과하는지 검증
+     * 직렬화가 잘 이루어지는지 검증
+     */
     @ParameterizedTest
     @ValueSource(ints = {0, 1000})
     void 특정_유저의_포인트_차감에_성공한다(long useAmount) throws Exception {
@@ -126,6 +144,10 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.point").value(originAmount - useAmount));
     }
 
+    /**
+     * 음수 값을 요청하면, 유효성 검증 실패하는지 검증
+     * ErrorResponse 에 대하여 직렬화가 잘 이루어지는지 검증
+     */
     @Test
     void 특정_유저의_포인트_차감시_음수로하면_실패한다() throws Exception {
         //given
@@ -142,6 +164,9 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.message").value("포인트는 0을 포함한 양수이어야 합니다"));
     }
 
+    /**
+     * ErrorResponse 에 대하여 직렬화가 잘 이루어지는지 검증
+     */
     @Test
     void 특정_유저의_포인트_차감시_포인트가_부족하다면_실패한다() throws Exception {
         long userId = 1L;
